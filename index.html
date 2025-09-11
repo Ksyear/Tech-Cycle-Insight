@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tech Cycle Insight</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #e0e5ec 0%, #f7f9fc 100%);
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem;
+    }
+
+    .main-container {
+      max-width: 1200px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .top-section {
+      background-color: #e0e5ec;
+      border-radius: 1.5rem;
+      box-shadow: 10px 10px 20px #c6cbd4, -10px -10px 20px #faffff;
+      padding: 2.5rem;
+      display: flex;
+      gap: 2rem;
+    }
+
+    .bottom-section {
+      background-color: #e0e5ec;
+      border-radius: 1.5rem;
+      box-shadow: 10px 10px 20px #c6cbd4, -10px -10px 20px #faffff;
+      padding: 2.5rem;
+    }
+
+    .left-panel {
+      flex: 1;
+    }
+
+    .right-panel {
+      flex: 2;
+    }
+
+    .card {
+      background-color: #e0e5ec;
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: inset 5px 5px 10px #c6cbd4, inset -5px -5px 10px #faffff;
+      transition: all 0.3s ease;
+    }
+
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left-color: #4a90e2;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .tech-list-item {
+      cursor: pointer;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.2s;
+    }
+
+    .tech-list-item:hover {
+      background-color: #d1d9e6;
+    }
+
+    .tech-list-item.selected {
+      background-color: #c0c9d9;
+      box-shadow: inset 2px 2px 5px #a6acb8, inset -2px -2px 5px #eaf1ff;
+    }
+
+    /* 선택된 포트폴리오를 강조하는 스타일 */
+    .portfolio-card.highlighted {
+      box-shadow: 5px 5px 10px #a6acb8, -5px -5px 10px #eaf1ff;
+      transform: translateY(-5px);
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="main-container mx-auto p-8">
+  <h1 class="text-4xl font-extrabold text-center text-gray-800 mb-2">Tech Cycle Insight</h1>
+  <p class="text-center text-gray-500 mb-10">특구 데이터 기반, 기술의 성장 단계를 예측하고 투자 포트폴리오를 제안합니다.</p>
+
+  <div class="top-section">
+    <div class="left-panel">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">기술 목록</h2>
+      <input type="text" id="searchInput" placeholder="기술 검색..."
+             class="w-full p-3 mb-4 border-none bg-white shadow-inner rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700">
+
+      <div id="techListContainer" class="card overflow-y-auto max-h-[600px]">
+        <ul id="techList" class="space-y-2">
+        </ul>
+      </div>
+    </div>
+
+    <div class="right-panel">
+      <div id="loadingIndicator" class="hidden flex justify-center items-center py-10">
+        <div class="spinner"></div>
+        <span class="ml-4 text-gray-600">데이터를 분석 중입니다...</span>
+      </div>
+
+      <div id="resultsSection" class="hidden">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">분석 결과</h2>
+        <div id="techLifeCycle" class="card">
+          <h3 class="text-xl font-bold text-gray-700 mb-4 text-center">기술 수명주기 단계</h3>
+          <div id="techStage" class="flex flex-col items-center">
+            <span class="text-5xl font-extrabold text-blue-500 text-neon" id="techNameDisplay"></span>
+            <span class="text-lg font-semibold text-gray-600 mt-2" id="techStageDisplay"></span>
+            <p class="text-center text-gray-500 mt-4" id="techDescription"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="portfolioSection" class="bottom-section hidden">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">투자 포트폴리오 제안</h2>
+    <div id="portfolioSuggestions" class="flex space-x-4">
+      <div class="flex-1 card portfolio-card" data-stage="도입기">
+        <h4 class="text-lg font-semibold text-green-600 flex items-center mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24"
+               fill="currentColor">
+            <path
+                    d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-1.036 15.391l-4.24-4.24 1.414-1.414 2.828 2.828 5.657-5.657 1.414 1.414-7.071 7.071z" />
+          </svg>
+          안정적 (저위험)
+        </h4>
+        <ul id="lowRiskList" class="list-disc list-inside text-gray-600 ml-4 mt-2"></ul>
+      </div>
+      <div class="flex-1 card portfolio-card" data-stage="성장기">
+        <h4 class="text-lg font-semibold text-yellow-600 flex items-center mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24"
+               fill="currentColor">
+            <path
+                    d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zM12 17a1 1 0 0 1-1-1v-4a1 1 0 0 1 2 0v4a1 1 0 0 1-1 1zm0-7a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+          </svg>
+          성장주 (중위험)
+        </h4>
+        <ul id="mediumRiskList" class="list-disc list-inside text-gray-600 ml-4 mt-2"></ul>
+      </div>
+      <div class="flex-1 card portfolio-card" data-stage="성숙기">
+        <h4 class="text-lg font-semibold text-red-600 flex items-center mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24"
+               fill="currentColor">
+            <path
+                    d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+          </svg>
+          미래기술 (고위험)
+        </h4>
+        <ul id="highRiskList" class="list-disc list-inside text-gray-600 ml-4 mt-2"></ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchInput');
+    const techList = document.getElementById('techList');
+    const resultsSection = document.getElementById('resultsSection');
+    const portfolioSection = document.getElementById('portfolioSection');
+    const techNameDisplay = document.getElementById('techNameDisplay');
+    const techStageDisplay = document.getElementById('techStageDisplay');
+    const techDescription = document.getElementById('techDescription');
+    const lowRiskList = document.getElementById('lowRiskList');
+    const mediumRiskList = document.getElementById('mediumRiskList');
+    const highRiskList = document.getElementById('highRiskList');
+    const techListContainer = document.getElementById('techListContainer');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+
+    let allData = { tech_life_cycle: [], portfolio_suggestions: {} };
+
+    // 데이터를 가져와서 초기 UI를 렌더링
+    const fetchData = async () => {
+      loadingIndicator.classList.remove('hidden');
+      try {
+        const response = await fetch('./data.json');
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        allData = await response.json();
+        loadingIndicator.classList.add('hidden');
+        initializeUI();
+      } catch (error) {
+        loadingIndicator.classList.add('hidden');
+        console.error('데이터를 불러오는 중 오류가 발생했습니다:', error);
+      }
+    };
+
+    // 초기 UI 렌더링
+    const initializeUI = () => {
+      renderTechList(allData.tech_life_cycle);
+      renderAllPortfolios(allData.portfolio_suggestions);
+    };
+
+    // 기술 목록을 렌더링
+    const renderTechList = (techs) => {
+      techList.innerHTML = '';
+      const displayTechs = techs.slice(0, 10);
+      if (techs.length > 10) {
+        techListContainer.classList.add('overflow-y-auto');
+      } else {
+        techListContainer.classList.remove('overflow-y-auto');
+      }
+
+      displayTechs.forEach(tech => {
+        const li = document.createElement('li');
+        li.textContent = tech.name;
+        li.className = 'tech-list-item';
+        li.dataset.techName = tech.name;
+        li.dataset.techStage = tech.stage;
+        li.addEventListener('click', () => {
+          handleTechClick(tech);
+        });
+        techList.appendChild(li);
+      });
+    };
+
+    // 모든 포트폴리오 제안을 렌더링하는 함수
+    const renderAllPortfolios = (suggestions) => {
+      lowRiskList.innerHTML = '';
+      mediumRiskList.innerHTML = '';
+      highRiskList.innerHTML = '';
+
+      if (suggestions && suggestions.low_risk) {
+        lowRiskList.innerHTML = suggestions.low_risk.map(tech => `<li>${tech}</li>`).join('');
+      }
+      if (suggestions && suggestions.medium_risk) {
+        mediumRiskList.innerHTML = suggestions.medium_risk.map(tech => `<li>${tech}</li>`).join('');
+      }
+      if (suggestions && suggestions.high_risk) {
+        highRiskList.innerHTML = suggestions.high_risk.map(tech => `<li>${tech}</li>`).join('');
+      }
+    };
+
+    // 기술 목록 클릭 이벤트 핸들러
+    const handleTechClick = (tech) => {
+      // 모든 목록 항목에서 선택 클래스 제거
+      document.querySelectorAll('.tech-list-item').forEach(item => {
+        item.classList.remove('selected');
+      });
+      // 클릭된 항목에 선택 클래스 추가
+      const clickedItem = document.querySelector(`[data-tech-name="${tech.name}"]`);
+      if (clickedItem) {
+        clickedItem.classList.add('selected');
+      }
+
+      // 분석 결과 및 포트폴리오 섹션 표시
+      resultsSection.classList.remove('hidden');
+      portfolioSection.classList.remove('hidden');
+
+      // 분석 결과 텍스트 업데이트
+      techNameDisplay.textContent = tech.name;
+      techStageDisplay.textContent = tech.stage;
+      techDescription.textContent = tech.description;
+
+      // 포트폴리오 카드 하이라이트 업데이트
+      updatePortfolioHighlight(tech.stage);
+    };
+
+    // 선택된 단계에 따라 포트폴리오 카드를 하이라이트하는 함수
+    const updatePortfolioHighlight = (stage) => {
+      document.querySelectorAll('.portfolio-card').forEach(card => {
+        card.classList.remove('highlighted');
+      });
+
+      let targetCard = null;
+      switch (stage) {
+        case '도입기':
+          targetCard = document.querySelector('[data-stage="도입기"]');
+          break;
+        case '성장기':
+          targetCard = document.querySelector('[data-stage="성장기"]');
+          break;
+        case '성숙기':
+          targetCard = document.querySelector('[data-stage="성숙기"]');
+          break;
+        default:
+          break;
+      }
+      if (targetCard) {
+        targetCard.classList.add('highlighted');
+      }
+    };
+
+    // 실시간 검색 필터
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.trim().toLowerCase();
+      const filteredTechs = allData.tech_life_cycle.filter(tech =>
+              tech.name.toLowerCase().includes(query)
+      );
+      renderTechList(filteredTechs);
+    });
+
+    // 앱 초기화
+    fetchData();
+  });
+</script>
+</body>
+
+</html>
